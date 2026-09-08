@@ -4,7 +4,10 @@
   "package": "com.agent772.petrochem_pnp_compat.mixin",
   "compatibilityLevel": "JAVA_21",
   "refmap": "petrochem_pnp_compat.refmap.json",
-  "mixins": [],
+  "mixins": [
+    "DistillationControllerBlockEntityMixin",
+    "TankSegmentAccessor"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
