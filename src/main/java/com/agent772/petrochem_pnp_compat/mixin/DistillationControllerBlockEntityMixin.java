@@ -1,11 +1,14 @@
 package com.agent772.petrochem_pnp_compat.mixin;
 
 import com.agent772.petrochem_pnp_compat.fluid.InputSlotHandler;
+import com.agent772.petrochem_pnp_compat.fluid.OutputSlotHandler;
 import com.agent772.petrochem_pnp_compat.fluid.SidedFluidAccess;
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
+import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollOptionBehaviour;
 
 import io.github.hadron13.petrochem.blocks.distillation_tower.DistillationControllerBlock;
 import io.github.hadron13.petrochem.blocks.distillation_tower.DistillationControllerBlockEntity;
+import io.github.hadron13.petrochem.blocks.distillation_tower.DistillationControllerBlockEntity.DistilMode;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,16 +29,31 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class DistillationControllerBlockEntityMixin implements SidedFluidAccess {
 
     @Shadow
+    public ScrollOptionBehaviour<DistilMode> distilMode;
+
+    @Shadow
     public SmartFluidTankBehaviour inputTank;
+
+    @Shadow
+    public SmartFluidTankBehaviour outputTank;
 
     @Shadow
     public IFluidHandler fluidCapability;
 
     @Unique
-    private IFluidHandler petrochemPnpCompat$positiveSideInput;
+    private IFluidHandler petrochemPnpCompat$positiveInputHandler;
 
     @Unique
-    private IFluidHandler petrochemPnpCompat$negativeSideInput;
+    private IFluidHandler petrochemPnpCompat$positiveVacuumHandler;
+
+    @Unique
+    private IFluidHandler petrochemPnpCompat$negativeFlashHandler;
+
+    @Unique
+    private IFluidHandler petrochemPnpCompat$negativeAtmosphericHandler;
+
+    @Unique
+    private IFluidHandler petrochemPnpCompat$negativeVacuumHandler;
 
     @SuppressWarnings("unchecked")
     @Redirect(
@@ -55,8 +73,6 @@ public abstract class DistillationControllerBlockEntityMixin implements SidedFlu
 
     @Override
     public IFluidHandler petrochemPnpCompat$sidedFluidHandler(Direction side) {
-        // A null context is the tower's own lookup in getSteam()/tick() and the goggle tooltip, which
-        // need to see every tank. Only the two exposed faces get a narrowed handler.
         if (side == null) {
             return fluidCapability;
         }
@@ -64,20 +80,43 @@ public abstract class DistillationControllerBlockEntityMixin implements SidedFlu
         if (side.getAxis() != DistillationControllerBlock.getAxis(be.getBlockState())) {
             return null;
         }
+        DistilMode mode = (DistilMode) distilMode.get();
         if (side.getAxisDirection() == Direction.AxisDirection.POSITIVE) {
-            if (petrochemPnpCompat$positiveSideInput == null) {
-                petrochemPnpCompat$positiveSideInput = petrochemPnpCompat$inputSlot(0);
+            if (mode == DistilMode.DISTIL_VACUUM) {
+                if (petrochemPnpCompat$positiveVacuumHandler == null) {
+                    petrochemPnpCompat$positiveVacuumHandler = new OutputSlotHandler(
+                            ((TankSegmentAccessor) outputTank.getTanks()[0]).getTank());
+                }
+                return petrochemPnpCompat$positiveVacuumHandler;
             }
-            return petrochemPnpCompat$positiveSideInput;
+            if (petrochemPnpCompat$positiveInputHandler == null) {
+                petrochemPnpCompat$positiveInputHandler = new InputSlotHandler(
+                        ((TankSegmentAccessor) inputTank.getTanks()[0]).getTank());
+            }
+            return petrochemPnpCompat$positiveInputHandler;
         }
-        if (petrochemPnpCompat$negativeSideInput == null) {
-            petrochemPnpCompat$negativeSideInput = petrochemPnpCompat$inputSlot(1);
-        }
-        return petrochemPnpCompat$negativeSideInput;
-    }
-
-    @Unique
-    private IFluidHandler petrochemPnpCompat$inputSlot(int slot) {
-        return new InputSlotHandler(((TankSegmentAccessor) inputTank.getTanks()[slot]).getTank());
+        return switch (mode) {
+            case DISTIL_FLASH -> {
+                if (petrochemPnpCompat$negativeFlashHandler == null) {
+                    petrochemPnpCompat$negativeFlashHandler = new InputSlotHandler(
+                            ((TankSegmentAccessor) inputTank.getTanks()[1]).getTank());
+                }
+                yield petrochemPnpCompat$negativeFlashHandler;
+            }
+            case DISTIL_ATMOSPHERIC -> {
+                if (petrochemPnpCompat$negativeAtmosphericHandler == null) {
+                    petrochemPnpCompat$negativeAtmosphericHandler = new InputSlotHandler(
+                            ((TankSegmentAccessor) inputTank.getTanks()[0]).getTank());
+                }
+                yield petrochemPnpCompat$negativeAtmosphericHandler;
+            }
+            case DISTIL_VACUUM -> {
+                if (petrochemPnpCompat$negativeVacuumHandler == null) {
+                    petrochemPnpCompat$negativeVacuumHandler = new InputSlotHandler(
+                            ((TankSegmentAccessor) inputTank.getTanks()[0]).getTank());
+                }
+                yield petrochemPnpCompat$negativeVacuumHandler;
+            }
+        };
     }
 }
