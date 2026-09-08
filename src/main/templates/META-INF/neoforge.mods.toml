@@ -17,32 +17,32 @@ config="${mod_id}.mixins.json"
     type="required"
     versionRange="[${neo_version},)"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="create"
     type="required"
     versionRange="${create_version_range}"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="petrochem"
     type="required"
     versionRange="${petrochem_version_range}"
     ordering="AFTER"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="pipesnphysics"
     type="required"
     versionRange="${pipesnphysics_version_range}"
     ordering="AFTER"
-    side="BOTH"
+    side="SERVER"
