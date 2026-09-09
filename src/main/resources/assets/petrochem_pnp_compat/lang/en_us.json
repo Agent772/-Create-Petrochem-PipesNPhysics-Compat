@@ -1,0 +1,6 @@
+{
+  "petrochem_pnp_compat.hint.vacuum_suction.title": "Not enough suction",
+  "petrochem_pnp_compat.hint.vacuum_suction.no_pump": "No pump on the pipe network.",
+  "petrochem_pnp_compat.hint.vacuum_suction.slow_pump": "Pump too slow: %1$s of %2$s RPM.",
+  "petrochem_pnp_compat.hint.vacuum_suction.weak_pump": "The pump is not keeping up."
+}

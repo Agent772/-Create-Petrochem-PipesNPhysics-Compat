@@ -2,15 +2,19 @@ package com.agent772.petrochem_pnp_compat.fluid;
 
 import com.simibubi.create.foundation.fluid.SmartFluidTank;
 
+import java.util.function.IntSupplier;
+
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 public class OutputSlotHandler implements IFluidHandler {
 
     private final SmartFluidTank tank;
+    private final IntSupplier drainAllowance;
 
-    public OutputSlotHandler(SmartFluidTank tank) {
+    public OutputSlotHandler(SmartFluidTank tank, IntSupplier drainAllowance) {
         this.tank = tank;
+        this.drainAllowance = drainAllowance;
     }
 
     @Override
@@ -40,11 +44,12 @@ public class OutputSlotHandler implements IFluidHandler {
 
     @Override
     public FluidStack drain(FluidStack resource, FluidAction action) {
-        return tank.drain(resource, action);
+        int allowed = drainAllowance.getAsInt();
+        return tank.drain(resource.getAmount() <= allowed ? resource : resource.copyWithAmount(allowed), action);
     }
 
     @Override
     public FluidStack drain(int maxDrain, FluidAction action) {
-        return tank.drain(maxDrain, action);
+        return tank.drain(Math.min(maxDrain, drainAllowance.getAsInt()), action);
     }
 }
