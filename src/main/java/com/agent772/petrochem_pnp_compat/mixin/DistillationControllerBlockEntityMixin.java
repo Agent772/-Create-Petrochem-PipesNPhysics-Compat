@@ -267,7 +267,7 @@ public abstract class DistillationControllerBlockEntityMixin implements SidedFlu
         }
     }
 
-    @Inject(method = "addToGoggleTooltip", at = @At("RETURN"))
+    @Inject(method = "addToGoggleTooltip", at = @At("RETURN"), cancellable = true)
     private void petrochemPnpCompat$explainMissingSuction(List<Component> tooltip, boolean isPlayerSneaking,
             CallbackInfoReturnable<Boolean> cir) {
         if ((DistilMode) distilMode.get() != DistilMode.DISTIL_VACUUM || hasVacuum()
