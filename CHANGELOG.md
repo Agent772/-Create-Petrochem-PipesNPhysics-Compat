@@ -1,4 +1,4 @@
-## Version 1.1.1
+## Version 1.1.2
 
-### Fixed
-- Fixed a crash when viewing a distillation tower with Create goggles while it was in vacuum mode with suction missing or insufficient.
+### Updated
+- Updated version rage for petrochem to include 1.3.3
